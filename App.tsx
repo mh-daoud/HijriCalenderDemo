@@ -25,10 +25,10 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
-import NTCalender from './src/NTCalender';
-import {NTCalenderType} from './src/NTCalender/types';
+import NTCalendar from './src/NTCalendar';
+import {NTCalendarType} from './src/NTCalendar/types';
 import {calenderTemplate} from './constants';
-import {sameDay} from './src/NTCalender/utils';
+import {sameDay} from './src/NTCalendar/utils';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -62,8 +62,8 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [calendarType, setCalenderType] = useState<NTCalenderType>(
-    NTCalenderType.Gregorian,
+  const [calendarType, setCalenderType] = useState<NTCalendarType>(
+    NTCalendarType.Gregorian,
   );
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
 
@@ -103,20 +103,20 @@ function App(): React.JSX.Element {
             }}
             onPress={() => {
               setCalenderType(
-                calendarType === NTCalenderType.Gregorian
-                  ? NTCalenderType.Hijri
-                  : NTCalenderType.Gregorian,
+                calendarType === NTCalendarType.Gregorian
+                  ? NTCalendarType.Hijri
+                  : NTCalendarType.Gregorian,
               );
             }}>
             <Text style={{}}>
               Switch To{' '}
-              {calendarType === NTCalenderType.Gregorian
+              {calendarType === NTCalendarType.Gregorian
                 ? 'Hijri'
                 : 'Gregorian'}
             </Text>
           </TouchableOpacity>
         </View>
-        <NTCalender
+        <NTCalendar
           template={calenderTemplate}
           calendarType={calendarType}
           onDayPress={appendToSelectedDates}

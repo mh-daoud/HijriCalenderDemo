@@ -1,6 +1,6 @@
-import {NTCalenderTemplate} from './src/NTCalender/types';
+import {NTCalendarTemplate} from './src/NTCalendar/types';
 
-export const calenderTemplate: NTCalenderTemplate = {
+export const calenderTemplate: NTCalendarTemplate = {
   layout: {
     headerWithControlsOrder: 10,
     weekDaysHeaderOrder: 5,
