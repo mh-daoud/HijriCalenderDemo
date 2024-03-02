@@ -3,22 +3,26 @@ import {StyleSheet} from 'react-native';
 export const getStyles = () => {
   return StyleSheet.create({
     titleRow: {
-      borderWidth: 1,
       width: '100%',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
+      marginVertical: 8,
     },
     button: {
-      width: 24,
-      height: 24,
+      width: 32,
+      height: 32,
       borderRadius: 100,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: '#eee',
+      padding: 4,
     },
     buttonText: {
       fontSize: 16,
+    },
+    icon: {
+      flex: 1,
     },
   });
 };

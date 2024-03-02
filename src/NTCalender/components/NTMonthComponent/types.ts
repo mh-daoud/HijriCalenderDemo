@@ -1,4 +1,4 @@
-import {NTWeek, NTYearMonths} from '../../types';
+import {NTMonthDisplayComponentTheme, NTWeek, NTYearMonths} from '../../types';
 
 export interface NTMonthComponentProps {
   currentDate: Date;
@@ -6,4 +6,5 @@ export interface NTMonthComponentProps {
   currentDayOfTheMonth?: number;
   onDayPress?: (day: number) => void;
   selectedDaysInMonth?: number[];
+  theme?: NTMonthDisplayComponentTheme;
 }

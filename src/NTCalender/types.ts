@@ -1,4 +1,4 @@
-import {StyleProp, TextStyle, ViewStyle} from 'react-native';
+import {ImageStyle, StyleProp, TextStyle, ViewStyle} from 'react-native';
 
 export interface NTCalenderProps {
   calendarType?: NTCalenderType;
@@ -10,8 +10,7 @@ export interface NTCalenderProps {
   disableWeekDaysRecursive?: number[];
   onDayPress?: (date: Date) => void;
   template?: NTCalenderTemplate;
-  // 8 - renderDayComponent = ({dateText, isSelected, isDisabled})
-  // 10- month view, year view
+  containerStyles?: StyleProp<ViewStyle>;
 }
 
 export enum NTCalenderType {
@@ -59,23 +58,32 @@ export interface NTCalenderTerminology {
 }
 
 export interface NTTheme {
-  header?: {
-    monthTextStyle?: StyleProp<TextStyle>;
-    yearTextStyle?: StyleProp<TextStyle>;
-    buttonViewStyle?: StyleProp<ViewStyle>;
-    buttonText?: StyleProp<TextStyle>;
-  };
-  weekHeader?: {
-    textStyle?: StyleProp<TextStyle>;
-    containerStyle?: StyleProp<ViewStyle>;
-    wrapperStyle?: StyleProp<ViewStyle>;
-  };
-  monthDisplay?: {
-    placeholderDay?: NTDayStyle;
-    disabledDay?: NTDayStyle;
-    normalDay?: NTDayStyle;
-    selectedDay?: NTDayStyle;
-  };
+  header?: NTHeaderComponentTheme;
+  weekHeader?: NTWeekHeaderComponentTheme;
+  monthDisplay?: NTMonthDisplayComponentTheme;
+}
+
+export interface NTHeaderComponentTheme {
+  headerTextStyles?: StyleProp<TextStyle>;
+  buttonViewStyle?: StyleProp<ViewStyle>;
+  iconStyle?: StyleProp<ImageStyle>;
+  wrapperStyles?: StyleProp<ViewStyle>;
+}
+
+export interface NTWeekHeaderComponentTheme {
+  textStyle?: StyleProp<TextStyle>;
+  containerStyle?: StyleProp<ViewStyle>;
+  wrapperStyle?: StyleProp<ViewStyle>;
+}
+
+export interface NTMonthDisplayComponentTheme {
+  containerStyles?: StyleProp<ViewStyle>;
+  weekContainerStyles?: StyleProp<ViewStyle>;
+  placeholderDay?: NTDayStyle;
+  disabledDay?: NTDayStyle;
+  normalDay?: NTDayStyle;
+  currentDay?: NTDayStyle;
+  selectedDay?: NTDayStyle;
 }
 
 export interface NTDayStyle {

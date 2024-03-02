@@ -17,6 +17,7 @@ export const NTCalender = ({
   selectedDates,
   calenderEndLimit,
   calenderStartLimit,
+  containerStyles,
 }: NTCalenderProps) => {
   const [calendarType, setCalenderType] = useState<NTCalenderType>(
     NTCalenderType.Gregorian,
@@ -156,10 +157,17 @@ export const NTCalender = ({
               onControlButtonPressed={changeMonth}
               isNextMonthButtonDisabled={isNextMonthButtonDisabled}
               isPrevMonthButtonDisabled={isPrevMonthButtonDisabled}
+              theme={template.theme?.header}
             />
           );
         case 'weekDaysHeaderOrder':
-          return <NTWeekHeader key={key} daysOfWeek={daysOfWeek} />;
+          return (
+            <NTWeekHeader
+              key={key}
+              daysOfWeek={daysOfWeek}
+              theme={template.theme?.weekHeader}
+            />
+          );
         case 'monthDisplayOrder':
         default:
           return (
@@ -172,35 +180,16 @@ export const NTCalender = ({
               key={key}
               weeksOfMonth={weeksOfMonth}
               onDayPress={_onDayPress}
+              theme={template.theme?.monthDisplay}
             />
           );
       }
     });
   };
 
-  return <View style={styles.container}>{renderTemplate()}</View>;
+  return (
+    <View style={[styles.container, containerStyles]}>{renderTemplate()}</View>
+  );
 };
 
 export default NTCalender;
-
-/*
-switch to hijri
-< Month - year >   <- controller
-Sun Mon Tue Wen Thu Fri Sat <- WeekDaysNames
-
-[1] 2    3   4   5   6   7
-
-8   9    10  11  12  13  14
-
-15  16   17  18  19  20  21
-
-22  23   24  25  26  27  28
-
-29  30   31
-
-todo:
-2- connect theme
-4- convert to package 
-5- enhance design more 
-
-*/

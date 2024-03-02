@@ -6,7 +6,6 @@ export const getStyles = () => {
       backgroundColor: '#eeffff',
       flex: 1,
       minHeight: 40,
-      borderWidth: 1,
       alignItems: 'center',
       justifyContent: 'center',
     },
@@ -21,7 +20,6 @@ export const getStyles = () => {
     },
     placeHolderDay: {
       backgroundColor: 'grey',
-      borderWidth: 1,
       flex: 1,
       minHeight: 40,
       paddingVertical: 4,

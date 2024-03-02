@@ -5,10 +5,12 @@ export const getStyles = () => {
     row: {
       flexDirection: 'row',
     },
+    wrapperStyle: {
+      flex: 1,
+    },
     weekDay: {
       padding: 4,
-      fontSize: 12,
-      flex: 1,
+      fontSize: 16,
       textAlign: 'center',
     },
   });

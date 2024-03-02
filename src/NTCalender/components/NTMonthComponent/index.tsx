@@ -10,12 +10,14 @@ export const NTMonthComponent = ({
   currentDate,
   currentDayOfTheMonth,
   selectedDaysInMonth,
+  theme,
 }: NTMonthComponentProps) => {
   const styles = getStyles();
   const onPress = useCallback(
     (day: number) => onDayPress?.(day),
     [onDayPress, currentDate],
   );
+  const {containerStyles} = theme ?? {};
   const renderWeeks = () => {
     return weeksOfMonth.map((week, key) => (
       <NTWeekComponent
@@ -28,7 +30,9 @@ export const NTMonthComponent = ({
       />
     ));
   };
-  return <View style={styles.container}>{renderWeeks()}</View>;
+  return (
+    <View style={[styles.container, containerStyles]}>{renderWeeks()}</View>
+  );
 };
 
 export default NTMonthComponent;

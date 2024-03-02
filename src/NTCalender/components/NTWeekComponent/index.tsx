@@ -8,8 +8,10 @@ export const NTWeekComponent = ({
   onDayPress,
   currentDayOfTheMonth,
   selectedDaysInMonth,
+  theme,
 }: NTWeekComponentProps) => {
   const styles = getStyles();
+  const {weekContainerStyles} = theme ?? {};
   const renderDaysOfWeek = (week: number[]) => {
     return week.map((day, key) => (
       <NTDayComponent
@@ -22,7 +24,11 @@ export const NTWeekComponent = ({
     ));
   };
 
-  return <View style={styles.weekHolder}>{renderDaysOfWeek(week)}</View>;
+  return (
+    <View style={[styles.weekHolder, weekContainerStyles]}>
+      {renderDaysOfWeek(week)}
+    </View>
+  );
 };
 
 export default NTWeekComponent;
