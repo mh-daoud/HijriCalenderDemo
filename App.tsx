@@ -5,7 +5,7 @@
  * @format
  */
 
-import React from 'react';
+import React, {useState} from 'react';
 import type {PropsWithChildren} from 'react';
 import {
   SafeAreaView,
@@ -13,6 +13,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
@@ -24,6 +25,8 @@ import {
   LearnMoreLinks,
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+import NTCalender from './src/NTCalender';
+import {CalenderType} from './src/NTCalender/types';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -57,41 +60,48 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-
+  const [calendarType, setCalenderType] = useState<CalenderType>(
+    CalenderType.Gregorian,
+  );
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
   return (
     <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+      <View
+        style={{
+          backgroundColor: '#fff',
+          width: '100%',
+          paddingHorizontal: 16,
+          height: 400,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <View>
+          <TouchableOpacity
+            style={{
+              marginBottom: 20,
+              backgroundColor: 'gold',
+              paddingHorizontal: 24,
+              paddingVertical: 12,
+              borderRadius: 50,
+            }}
+            onPress={() => {
+              setCalenderType(
+                calendarType === CalenderType.Gregorian
+                  ? CalenderType.Hijri
+                  : CalenderType.Gregorian,
+              );
+            }}>
+            <Text style={{}}>
+              Switch To{' '}
+              {calendarType === CalenderType.Gregorian ? 'Hijri' : 'Gregorian'}
+            </Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
+        <NTCalender calendarType={calendarType} />
+      </View>
     </SafeAreaView>
   );
 }
