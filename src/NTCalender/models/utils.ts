@@ -16,11 +16,20 @@ export const addMonthsToDate = (
   return newDate;
 };
 
-export const splitIntoWeekChunks = (daysOfMonth: number[]): NTWeek[] => {
+export const splitIntoWeekChunks = (
+  daysOfMonth: number[],
+  monthNumberOfDays: number,
+): NTWeek[] => {
   const weeksOfTheMonth: NTWeek[] = [];
+  const wholeMonthDays = [...daysOfMonth];
+  while (wholeMonthDays.length < monthNumberOfDays) {
+    //account for calender end limit being less than month length
+    //add placeholders...
+    wholeMonthDays.push(-1);
+  }
   const chunkSize = 7;
-  for (let i = 0; i < daysOfMonth.length; i += chunkSize) {
-    const week = daysOfMonth.slice(i, i + chunkSize);
+  for (let i = 0; i < wholeMonthDays.length; i += chunkSize) {
+    const week = wholeMonthDays.slice(i, i + chunkSize);
     if (week.length < 7) {
       for (let i = week.length; i < 7; i++) {
         week.push(-1);
@@ -32,16 +41,21 @@ export const splitIntoWeekChunks = (daysOfMonth: number[]): NTWeek[] => {
 };
 
 export const daysOfMonthWithPlaceholders = (
-  monthStartDate: Date,
+  startDayNumber: number,
+  weekDay: number,
   monthNumberOfDays: number,
 ) => {
-  const weekDay = monthStartDate.getDay();
   const daysOfMonthWithPlaceholders: number[] = [];
 
+  for (let start = 1; start < startDayNumber; start++) {
+    //account for calender start limit being not 1
+    //add placeholders...
+    daysOfMonthWithPlaceholders.push(-1);
+  }
   for (let start = 0; start < weekDay; start++) {
     daysOfMonthWithPlaceholders.push(-1);
   }
-  for (let index = 1; index <= monthNumberOfDays; index++) {
+  for (let index = startDayNumber; index <= monthNumberOfDays; index++) {
     daysOfMonthWithPlaceholders.push(index);
   }
   return daysOfMonthWithPlaceholders;

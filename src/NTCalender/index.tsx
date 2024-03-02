@@ -1,85 +1,184 @@
 import {Text, TouchableOpacity, View} from 'react-native';
 import {getStyles} from './styles';
-import {daysOfWeek} from './constants';
+import {daysOfWeek, defaultTemplate} from './defualts';
 import {useEffect, useMemo, useState} from 'react';
-import {CalenderType, NTCalenderProps} from './types';
+import {NTCalenderType, NTCalenderProps, NTWeek} from './types';
 import NTDataUtilBridge from './models/NTDataUtilBridge';
+import NTHeaderComponent from './components/NTHeaderComponent';
+import NTWeekHeader from './components/NTWeekHeader';
+import NTMonthComponent from './components/NTMonthComponent';
+import {getSelectedDatesRecord, sameDay} from './utils';
 
 export const NTCalender = ({
   calendarType: propsCalendarType,
   calendarCurrentDate,
+  template = defaultTemplate,
+  onDayPress,
+  selectedDates,
+  calenderEndLimit,
+  calenderStartLimit,
 }: NTCalenderProps) => {
-  const [calendarType, setCalenderType] = useState<CalenderType>(
-    CalenderType.Gregorian,
+  const [calendarType, setCalenderType] = useState<NTCalenderType>(
+    NTCalenderType.Gregorian,
   );
   const [dateToRepresent, setDateToRepresent] = useState<Date>(new Date());
+
+  useEffect(() => {
+    if (propsCalendarType && propsCalendarType !== calendarType) {
+      setCalenderType(propsCalendarType);
+    }
+    if (calendarCurrentDate && !sameDay(calendarCurrentDate, dateToRepresent)) {
+      setDateToRepresent(calendarCurrentDate);
+    }
+  }, [propsCalendarType, calendarCurrentDate]);
+
   const dateUtil = useMemo(
     () => new NTDataUtilBridge(calendarType),
     [calendarType],
   );
 
-  useEffect(() => {
-    if (propsCalendarType) {
-      setCalenderType(propsCalendarType);
+  const dateToRepresentDateComponents = useMemo(
+    () => dateUtil.getDateComponents(dateToRepresent),
+    [calendarType, dateToRepresent],
+  );
+  const currentDateDateComponents = useMemo(
+    () => dateUtil.getDateComponents(new Date()),
+    [calendarType],
+  );
+
+  const {
+    year: currentYear,
+    month: currentMonth,
+    day: currentDay,
+  } = currentDateDateComponents;
+  const {monthName, month, year} = dateToRepresentDateComponents;
+
+  const isMonthInSameYearOfCurrentDate = useMemo(() => {
+    return year === currentYear && month === currentMonth;
+  }, [currentDateDateComponents, dateToRepresent]);
+
+  const weeksOfMonth: NTWeek[] = useMemo(
+    () =>
+      dateUtil.getMonthWeeks(
+        dateToRepresent,
+        calenderStartLimit,
+        calenderEndLimit,
+      ),
+    [
+      dateUtil,
+      dateToRepresent,
+      calendarType,
+      calenderStartLimit,
+      calenderEndLimit,
+    ],
+  );
+
+  const selectedYearRecord = useMemo(() => {
+    const selectedDatesComponents = selectedDates?.reduce(
+      (
+        selectedDatesComponents: {year: number; month: number; day: number}[],
+        selectedDate,
+      ) => {
+        const {
+          year: selectedDateYear,
+          month: selectedDateMonth,
+          day: selectedDateDay,
+        } = dateUtil.getDateComponents(selectedDate);
+        selectedDatesComponents.push({
+          year: selectedDateYear,
+          month: selectedDateMonth,
+          day: selectedDateDay,
+        });
+        return selectedDatesComponents;
+      },
+      [],
+    );
+    const yearRecord = getSelectedDatesRecord(selectedDatesComponents ?? [])?.[
+      year
+    ];
+    return yearRecord;
+  }, [selectedDates, calendarType]);
+
+  const isNextMonthButtonDisabled = useMemo(() => {
+    if (!calenderEndLimit) {
+      return false;
     }
-    if (calendarCurrentDate) {
-      setDateToRepresent(calendarCurrentDate);
+    const {year: calenderEndLimitDateYear, month: calenderEndLimitDateMonth} =
+      dateUtil.getDateComponents(calenderEndLimit);
+
+    return (
+      year > calenderEndLimitDateYear ||
+      (year >= calenderEndLimitDateYear && month >= calenderEndLimitDateMonth)
+    );
+  }, [dateToRepresent, calendarType, calenderEndLimit]);
+
+  const isPrevMonthButtonDisabled = useMemo(() => {
+    if (!calenderStartLimit) {
+      return false;
     }
-  }, [propsCalendarType, calendarCurrentDate]);
+    const {
+      year: calenderStartLimitDateYear,
+      month: calenderStartLimitDateMonth,
+    } = dateUtil.getDateComponents(calenderStartLimit);
+    return (
+      year < calenderStartLimitDateYear ||
+      (year <= calenderStartLimitDateYear &&
+        month <= calenderStartLimitDateMonth)
+    );
+  }, [dateToRepresent, calendarType, calenderStartLimit]);
 
   const styles = getStyles();
-  const renderWeekDays = () => {
-    return Object.keys(daysOfWeek).map(day => (
-      <Text style={styles.weekDay} key={day}>
-        {day}
-      </Text>
-    ));
-  };
 
-  const renderDaysOfWeek = (week: number[]) => {
-    return week.map((day, key) => (
-      <View
-        key={key}
-        style={[styles.dayHolder, day < 0 && styles.placeHolderDay]}>
-        {day > 0 && <Text style={styles.day}>{day}</Text>}
-      </View>
-    ));
-  };
-
-  const renderWeeks = () => {
-    const weeksOfMonth: number[][] = dateUtil.getMonthWeeks(dateToRepresent);
-    return weeksOfMonth.map((week, key) => (
-      <View key={key} style={styles.weekHolder}>
-        {renderDaysOfWeek(week)}
-      </View>
-    ));
-  };
-
-  const renderMonthTitle = () => {
-    const {monthName, year} = dateUtil.getDateComponents(dateToRepresent);
-    return <Text>{`${monthName} ${year}`}</Text>;
-  };
-
-  const changeMonth = (incrementAmount: number) =>
+  const changeMonth = (incrementAmount: number) => {
     setDateToRepresent(
       new Date(dateUtil.addMonths(dateToRepresent, incrementAmount)),
     );
+  };
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.titleRow}>
-        <TouchableOpacity onPress={() => changeMonth(-1)} style={styles.button}>
-          <Text style={styles.buttonText}>{'<'}</Text>
-        </TouchableOpacity>
-        {renderMonthTitle()}
-        <TouchableOpacity onPress={() => changeMonth(1)} style={styles.button}>
-          <Text style={styles.buttonText}>{'>'}</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.row}>{renderWeekDays()}</View>
-      <View>{renderWeeks()}</View>
-    </View>
-  );
+  const _onDayPress = (day: number) => {
+    const date = dateUtil.getDateFromDay(day, dateToRepresent);
+    onDayPress?.(date);
+  };
+
+  const renderTemplate = () => {
+    const templateOrdered = Object.entries(template?.layout ?? {}).sort(
+      (a, b) => a[1] - b[1],
+    );
+
+    return templateOrdered.map((component, key) => {
+      switch (component[0]) {
+        case 'headerWithControlsOrder':
+          return (
+            <NTHeaderComponent
+              key={key}
+              monthName={monthName}
+              year={year}
+              onControlButtonPressed={changeMonth}
+              isNextMonthButtonDisabled={isNextMonthButtonDisabled}
+              isPrevMonthButtonDisabled={isPrevMonthButtonDisabled}
+            />
+          );
+        case 'weekDaysHeaderOrder':
+          return <NTWeekHeader key={key} daysOfWeek={daysOfWeek} />;
+        case 'monthDisplayOrder':
+        default:
+          return (
+            <NTMonthComponent
+              currentDate={dateToRepresent}
+              currentDayOfTheMonth={
+                isMonthInSameYearOfCurrentDate ? currentDay : undefined
+              }
+              selectedDaysInMonth={selectedYearRecord?.[month as never]}
+              key={key}
+              weeksOfMonth={weeksOfMonth}
+              onDayPress={_onDayPress}
+            />
+          );
+      }
+    });
+  };
+
+  return <View style={styles.container}>{renderTemplate()}</View>;
 };
 
 export default NTCalender;
@@ -99,18 +198,9 @@ Sun Mon Tue Wen Thu Fri Sat <- WeekDaysNames
 
 29  30   31
 
+todo:
+2- connect theme
+4- convert to package 
+5- enhance design more 
 
-
-posible props 
-
-1- currentDate
-2- calender Type Hijri or ...
-3- enablePeriodSelection
-4- selectedDates ["2024-03-01","2024-03-02",.....]
-5- calender Future Limit 
-6- calender past limit
-7- disabled dates [""]
-8 - renderDayComponent = ({dateText, isSelected, isDisabled})
-9- onDayPressed = ({dateText})
-10- month view, year view
 */

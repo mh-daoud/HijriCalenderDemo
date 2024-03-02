@@ -26,7 +26,9 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import NTCalender from './src/NTCalender';
-import {CalenderType} from './src/NTCalender/types';
+import {NTCalenderType} from './src/NTCalender/types';
+import {calenderTemplate} from './constants';
+import {sameDay} from './src/NTCalender/utils';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -60,11 +62,23 @@ function Section({children, title}: SectionProps): React.JSX.Element {
 
 function App(): React.JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [calendarType, setCalenderType] = useState<CalenderType>(
-    CalenderType.Gregorian,
+  const [calendarType, setCalenderType] = useState<NTCalenderType>(
+    NTCalenderType.Gregorian,
   );
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  };
+
+  const appendToSelectedDates = (date: Date) => {
+    if (selectedDates.some(selectedDate => sameDay(selectedDate, date))) {
+      setSelectedDates(
+        selectedDates.filter(selectedDate => !sameDay(selectedDate, date)),
+      );
+    } else {
+      setSelectedDates([...selectedDates, date]);
+    }
   };
 
   return (
@@ -89,18 +103,27 @@ function App(): React.JSX.Element {
             }}
             onPress={() => {
               setCalenderType(
-                calendarType === CalenderType.Gregorian
-                  ? CalenderType.Hijri
-                  : CalenderType.Gregorian,
+                calendarType === NTCalenderType.Gregorian
+                  ? NTCalenderType.Hijri
+                  : NTCalenderType.Gregorian,
               );
             }}>
             <Text style={{}}>
               Switch To{' '}
-              {calendarType === CalenderType.Gregorian ? 'Hijri' : 'Gregorian'}
+              {calendarType === NTCalenderType.Gregorian
+                ? 'Hijri'
+                : 'Gregorian'}
             </Text>
           </TouchableOpacity>
         </View>
-        <NTCalender calendarType={calendarType} />
+        <NTCalender
+          template={calenderTemplate}
+          calendarType={calendarType}
+          onDayPress={appendToSelectedDates}
+          selectedDates={selectedDates}
+          // calenderEndLimit={new Date(2024, 2, 30)}
+          // calenderStartLimit={new Date(2024, 0, 2)}
+        />
       </View>
     </SafeAreaView>
   );

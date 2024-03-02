@@ -1,5 +1,11 @@
-import {hijriMonthOfTheYear} from '../constants';
-import {NTDateUtil, NTDateComponents, NTWeek} from '../types';
+import {hijriMonthOfTheYear} from '../defualts';
+import {
+  NTDateUtil,
+  NTDateComponents,
+  NTWeek,
+  NTHijriDateComponents,
+} from '../types';
+import {maxDay} from '../utils';
 import {
   addDayToDate,
   addMonthsToDate,
@@ -15,8 +21,8 @@ class NTHijriUtil implements NTDateUtil {
     const month = hijriDateComponents.month;
     const monthName =
       Object.entries(hijriMonthOfTheYear).find(
-        entry => entry[1] === month,
-      )?.[0] ?? '';
+        entry => entry[0] === month.toString(),
+      )?.[1] ?? '';
     return {
       month,
       day: hijriDateComponents.day,
@@ -26,15 +32,35 @@ class NTHijriUtil implements NTDateUtil {
     };
   };
 
-  getMonthWeeks = (date?: Date): NTWeek[] => {
-    const {monthStartDate, monthDaysCount, ...rest} =
-      this.#getHijriDateComponents(date);
-    const daysOfMonth = daysOfMonthWithPlaceholders(
-      monthStartDate,
-      monthDaysCount,
+  getMonthWeeks = (
+    date?: Date,
+    calenderStartLimit?: Date,
+    calenderEndLimit?: Date,
+  ): NTWeek[] => {
+    const dateHijriComponents = this.#getHijriDateComponents(date);
+    const {monthStartDate, monthDaysCount} = dateHijriComponents;
+
+    const monthStartOnDay = this.#getMonthStartDayCheckingLimit(
+      dateHijriComponents,
+      calenderStartLimit,
     );
 
-    return splitIntoWeekChunks(daysOfMonth);
+    const monthEndsOnDay = this.#getMonthEndDayCheckingLimit(
+      dateHijriComponents,
+      calenderEndLimit,
+    );
+
+    const startDate = calenderStartLimit
+      ? maxDay(monthStartDate, calenderStartLimit)
+      : monthStartDate;
+
+    const daysOfMonth = daysOfMonthWithPlaceholders(
+      monthStartOnDay,
+      startDate.getDay(),
+      monthEndsOnDay,
+    );
+
+    return splitIntoWeekChunks(daysOfMonth, monthDaysCount);
   };
 
   addMonths = (date?: Date, amount?: number): Date =>
@@ -46,7 +72,95 @@ class NTHijriUtil implements NTDateUtil {
     return monthDaysCount;
   };
 
-  #getHijriDateComponents = (date: Date = new Date()) => {
+  getDateFromDay = (day: number, dateWithinSameMonth: Date) => {
+    const currentDate = new Date(dateWithinSameMonth);
+    const {day: currentHijriDay} = this.#getHijriDateComponents(currentDate);
+    const dayDiff = day - currentHijriDay;
+    const date = addDayToDate(currentDate, dayDiff);
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  };
+
+  #getMonthStartDayCheckingLimit = (
+    dateHijriComponents: NTHijriDateComponents,
+    calenderStartLimit?: Date,
+  ) => {
+    const {year, month} = dateHijriComponents;
+    const calenderStartLimitDateComponents = calenderStartLimit
+      ? this.#getIntelFormatParts(calenderStartLimit)
+      : null;
+
+    const monthStartOnDay = calenderStartLimitDateComponents
+      ? this.#maxDay(
+          {year: year, month: month, day: 1},
+          {
+            year: parseInt(
+              this.#getHijriDateValueByType(
+                calenderStartLimitDateComponents,
+                'year',
+              ) ?? '',
+            ),
+            month:
+              parseInt(
+                this.#getHijriDateValueByType(
+                  calenderStartLimitDateComponents,
+                  'month',
+                ) ?? '',
+              ) - 1,
+            day: parseInt(
+              this.#getHijriDateValueByType(
+                calenderStartLimitDateComponents,
+                'day',
+              ) ?? '',
+            ),
+          },
+        ).day
+      : 1;
+
+    return monthStartOnDay;
+  };
+
+  #getMonthEndDayCheckingLimit = (
+    dateHijriComponents: NTHijriDateComponents,
+    calenderEndLimit?: Date,
+  ) => {
+    const {year, month, monthDaysCount} = dateHijriComponents;
+    const calenderEndLimitDateComponents = calenderEndLimit
+      ? this.#getIntelFormatParts(calenderEndLimit)
+      : null;
+
+    const monthEndsOnDay = calenderEndLimitDateComponents
+      ? this.#minDay(
+          {year: year, month: month, day: monthDaysCount},
+          {
+            year: parseInt(
+              this.#getHijriDateValueByType(
+                calenderEndLimitDateComponents,
+                'year',
+              ) ?? '',
+            ),
+            month:
+              parseInt(
+                this.#getHijriDateValueByType(
+                  calenderEndLimitDateComponents,
+                  'month',
+                ) ?? '',
+              ) - 1,
+            day: parseInt(
+              this.#getHijriDateValueByType(
+                calenderEndLimitDateComponents,
+                'day',
+              ) ?? '',
+            ),
+          },
+        ).day
+      : monthDaysCount;
+
+    return monthEndsOnDay;
+  };
+
+  #getHijriDateComponents = (
+    date: Date = new Date(),
+  ): NTHijriDateComponents => {
     const dateComponents = this.#getIntelFormatParts(date);
     const day = parseInt(
       this.#getHijriDateValueByType(dateComponents, 'day') ?? '',
@@ -113,6 +227,34 @@ class NTHijriUtil implements NTDateUtil {
     }
     futureDate = addDayToDate(new Date(futureDate), -1);
     return futureDate;
+  };
+
+  #maxDay = (
+    d1: {year: number; month: number; day: number},
+    d2: {year: number; month: number; day: number},
+  ) => {
+    if (
+      d1.year > d2.year ||
+      (d1.year >= d2.year && d1.month > d2.month) ||
+      (d1.year >= d2.year && d1.month >= d2.month && d1.day > d2.day)
+    ) {
+      return d1;
+    }
+    return d2;
+  };
+
+  #minDay = (
+    d1: {year: number; month: number; day: number},
+    d2: {year: number; month: number; day: number},
+  ) => {
+    if (
+      d1.year < d2.year ||
+      (d1.year <= d2.year && d1.month < d2.month) ||
+      (d1.year <= d2.year && d1.month <= d2.month && d1.day < d2.day)
+    ) {
+      return d1;
+    }
+    return d2;
   };
 }
 

@@ -2,10 +2,6 @@ import {StyleSheet} from 'react-native';
 
 export const getStyles = () => {
   return StyleSheet.create({
-    container: {
-      borderWidth: 1,
-      width: '100%',
-    },
     titleRow: {
       borderWidth: 1,
       width: '100%',
@@ -27,4 +23,4 @@ export const getStyles = () => {
   });
 };
 
-export default StyleSheet;
+export default getStyles;
