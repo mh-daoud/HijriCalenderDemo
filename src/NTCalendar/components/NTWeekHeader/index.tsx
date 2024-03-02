@@ -7,10 +7,8 @@ export const NTWeekHeader = ({daysOfWeek, theme}: NTWeekHeaderProps) => {
   const {containerStyle, wrapperStyle, textStyle} = theme ?? {};
   const renderWeekDays = () => {
     return Object.values(daysOfWeek).map(day => (
-      <View style={[styles.wrapperStyle, wrapperStyle]}>
-        <Text style={[styles.weekDay, textStyle]} key={day}>
-          {day}
-        </Text>
+      <View key={day} style={[styles.wrapperStyle, wrapperStyle]}>
+        <Text style={[styles.weekDay, textStyle]}>{day}</Text>
       </View>
     ));
   };
